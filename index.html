@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductor de Video</title>
+</head>
+<body>
+    <video id="videoPlayer" controls width="600"></video>
+
+    <script>
+        async function loadVideo(videoId) {
+            const response = await fetch(`http://localhost:3000/api/stream/${videoId}`);
+            const data = await response.json();
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = data.url;
+        }
+
+        // Reemplaza 'VIDEO_ID' con el ID del video de YouTube que deseas reproducir
+        loadVideo('jrC_69SRvU0');
+    </script>
+</body>
+</html>
