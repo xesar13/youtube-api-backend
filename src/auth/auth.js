@@ -1,5 +1,6 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const path = require('path');
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -15,8 +16,8 @@ passport.use(new GoogleStrategy({
       photos: profile.photos
     };
 
-    const filePath = path.join(__dirname, 'userProfile.json');
-    fs.writeFile(filePath, JSON.stringify(userProfile, null, 2), (err) => {
+    const filePath = path.join(__dirname, `../../data/series/userProfile.json`);
+    fs.writeFileSync(filePath, JSON.stringify(userProfile, null, 2), (err) => {
       if (err) {
         console.error('Error al guardar el perfil del usuario:', err);
         return done(err);
@@ -32,7 +33,7 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser((id, done) => {
-    const filePath = path.join(__dirname, 'userProfile.json');
+    const filePath = path.join(__dirname, '../../data/series/userProfile.json');
     fs.readFile(filePath, (err, data) => {
       if (err) {
         console.error('Error al leer el perfil del usuario:', err);
