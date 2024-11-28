@@ -22,7 +22,7 @@ app.use('/api', youTubeRoutes);
 
 // Ruta de autenticación con Google
 app.get('/auth/google',
-  passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/youtube'] })
+  passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
 // Ruta de callback de Google
