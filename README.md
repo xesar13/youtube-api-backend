@@ -37,6 +37,8 @@ youtube-api-backend
 4. Configura las variables de entorno en el archivo `.env`:
    ```
    YOUTUBE_API_KEY=tu_clave_de_api
+   GOOGLE_CLIENT_ID=google_client_id
+   GOOGLE_CLIENT_SECRET=google_client_secret
    ```
 
 ## Uso
