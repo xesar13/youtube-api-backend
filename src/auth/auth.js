@@ -4,7 +4,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://xtremtv.ddns.net:8011/auth/google/callback"
+    callbackURL: "https://xtremtv.ddns.net/stream_app/auth/google/callback"
   },
   function(accessToken, refreshToken, profile, done) {
     // Guardar el perfil del usuario en un archivo local
