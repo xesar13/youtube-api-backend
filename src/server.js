@@ -5,7 +5,7 @@ const session = require('express-session');
 const passport = require('passport');
 const ytdl = require('ytdl-core');
 require('dotenv').config();
-require('./auth'); // Asegúrate de que este archivo exista y esté configurado correctamente
+require('../auth/auth'); // Asegúrate de que este archivo exista y esté configurado correctamente
 
 const youTubeRoutes = require('./routes/youtubeRoutes');
 
