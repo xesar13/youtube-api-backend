@@ -21,7 +21,7 @@ app.use(passport.session());
 
 // Ruta de autenticación con Google
 app.get('/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })//scope: ['https://www.googleapis.com/auth/youtube'] })
+    passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/youtube','profile', 'email']})//scope: ['profile', 'email'] })//scope: ['https://www.googleapis.com/auth/youtube'] })
   );
   
   // Ruta de callback de Google
@@ -29,15 +29,22 @@ app.get('/auth/google',
     passport.authenticate('google', { failureRedirect: '/' }),
     (req, res) => {
       // Successful authentication, redirect home.
-      res.redirect('/');
+      res.redirect('/profile');
     }
   );
   
-  // Ruta para cerrar sesión
-  app.get('/logout', (req, res) => {
+// Ruta para cerrar sesión
+app.get('/logout', (req, res) => {
     req.logout((err) => {
       if (err) { return next(err); }
-      res.redirect('/');
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Error al destruir la sesión:', err);
+          return res.status(500).send('Error al cerrar sesión');
+        }
+        // Redirigir a la página de cierre de sesión de Google
+        res.redirect('https://accounts.google.com/Logout?continue=https://appengine.google.com/_ah/logout?continue=https://xtremtv.ddns.net');
+      });
     });
   });
   
