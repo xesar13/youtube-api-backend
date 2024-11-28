@@ -9,18 +9,19 @@ require('./auth/auth'); // Asegúrate de que este archivo exista y esté configu
 
 const app = express();
 const PORT = process.env.PORT || 8011;
+const SESSION_SECRET = process.env.SESSION_SECRET || 'fallback_secret';
 
 
 app.use(cors()); // Use the cors middleware with your optionsapp.use(bodyParser.json());
 app.use('/api', youTubeRoutes);
 app.use(bodyParser.json());
-app.use(session({ secret: 'la0b9Ck41X4vUbb3WKRosdYv', resave: false, saveUninitialized: true }));
+app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Ruta de autenticación con Google
 app.get('/auth/google',
-    passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/youtube'] })
+    passport.authenticate('google', { scope: ['profile', 'email'] })//scope: ['https://www.googleapis.com/auth/youtube'] })
   );
   
   // Ruta de callback de Google
