@@ -16,6 +16,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "sqlite3": "^5.1.7",
+    "yt-stream": "^1.7.4",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {

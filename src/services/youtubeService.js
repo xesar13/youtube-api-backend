@@ -1,6 +1,5 @@
 const axios = require('axios');
 require('dotenv').config();
-const ytdl = require('ytdl-core');
 
 
 class M3UService {
