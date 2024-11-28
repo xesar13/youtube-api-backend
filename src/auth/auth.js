@@ -17,7 +17,7 @@ passport.use(new GoogleStrategy({
       photos: profile.photos
     };
 
-    const filePath = path.join(__dirname, `../../data/series/userProfile.json`);
+    const filePath = path.join(__dirname, `../../data/userProfile.json`);
     fs.writeFileSync(filePath, JSON.stringify(userProfile, null, 2), (err) => {
       if (err) {
         console.error('Error al guardar el perfil del usuario:', err);
@@ -34,7 +34,7 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser((id, done) => {
-    const filePath = path.join(__dirname, '../../data/series/userProfile.json');
+    const filePath = path.join(__dirname, '../../data/userProfile.json');
     fs.readFile(filePath, (err, data) => {
       if (err) {
         console.error('Error al leer el perfil del usuario:', err);
