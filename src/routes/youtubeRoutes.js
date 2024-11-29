@@ -14,5 +14,8 @@ router.get('/search', youtubeController.searchVideos.bind(youtubeController));
 // Ruta para obtener la URL de transmisión de un video de YouTube
 router.get('/stream/:id', youtubeController.getStreamUrl.bind(youtubeController));
 
+router.get('/proxy/:id', youtubeController.streamVideo.bind(youtubeController));
+
+router.get('/livestream', youtubeController.livestream);
 
 module.exports = router;
