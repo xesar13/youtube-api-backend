@@ -74,8 +74,33 @@ class M3UController {
             }
         }
     }
+    async getStream (req, res) {
+        let url = req.query.url;
+        let type = req.query.type || 'video';
+        let info;
+        if (!url) {
+            return res.status(400).send('URL is required');
+        }
 
-    async livestream (req, res) {
+        if (!url) {
+            return res.status(400).send('URL is required');
+        }
+        if (youtubeService.validateUrl(url)) {
+        url = youtubeService.extractYouTubeId(url);
+        }
+        try {
+            // Obtener información del video
+
+            const video = await youtubeService.getVideoUrl(url);
+
+            const audio = await youtubeService.getAudioUrl(url);
+
+            res.json({audio,video});
+        } catch (error) {
+            console.error('Error streaming video:', error);
+        }
+    }
+    async liveDirect (req, res) {
         let url = req.query.url;
         let quality = req.query.quality || '720p';
 
@@ -91,7 +116,7 @@ class M3UController {
             // Obtener el formato del video
             const format = youtubeService.getVideoFormat(info);
              // Verificar si es un livestream
-             youtubeService.streamVideo(url, res);
+             youtubeService.streamVideoAudioM3u(url, res);
              return;
  
             /*const isLive = info.videoDetails.isLiveContent || info.formats.some(format =>
@@ -106,6 +131,37 @@ class M3UController {
                 youtubeService.streamVideo(url, format,info, res);
                 return;
             }*/
+
+        } catch (error) {
+            console.error('Error streaming video:', error);
+            if (error.message === 'Invalid video URL') {
+                return res.status(400).json({ error: 'Invalid video URL' });
+            }
+            if (error.message === 'No suitable formats found.') {
+                return res.status(404).send('No suitable formats found.');
+            }
+            if (error.statusCode === 403) {
+                return res.status(403).send('Access to the video is forbidden.');
+            }
+            if (!res.headersSent) {
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        }
+    };
+
+    async liveStream (req, res) {
+        let url = req.query.url;
+        let quality = req.query.quality || '720p';
+
+        if (!url) {
+            return res.status(400).send('URL is required');
+        }
+        if (youtubeService.validateUrl(url)) {
+           url = youtubeService.extractYouTubeId(url);
+        }
+        try {
+            const stream = youtubeService.getBestVideoUrlStreamDirect(url);
+            stream.pipe(res);
 
         } catch (error) {
             console.error('Error streaming video:', error);

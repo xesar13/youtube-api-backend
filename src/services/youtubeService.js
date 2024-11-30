@@ -129,12 +129,44 @@ class M3UService {
 
             // Send M3U content
             res.send(m3uContent);
+
         } catch (error) {
             console.error('Error generating M3U:', error.message);
             res.status(500).send('Error generating M3U file');
         }
       
     }
+
+    async streamVideoAudioM3u (url, res){
+              
+      const videoUrl = url; // The YouTube URL to process
+
+      if (!videoUrl) {
+          return res.status(400).send('Missing URL parameter');
+      }
+
+      try {
+
+          // Get the video URL
+          const bestVideoUrl = await this.getBestVideoUrl(videoUrl);
+          const bestAudioUrl = await this.getBestAudioUrl(videoUrl);
+
+          // Create M3U content
+          const m3uContent = `#EXTM3U\n#EXTINF:-1, YouTube Video\n#EXTVLCOPT:input-slave=${bestAudioUrl}\n${bestVideoUrl}`.trim();
+
+          // Set headers for downloading the M3U file
+          res.setHeader('Content-Disposition', 'inline; filename="playlist.m3u"');
+          res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+
+          // Send M3U content
+          res.send(m3uContent);
+
+      } catch (error) {
+          console.error('Error generating M3U:', error.message);
+          res.status(500).send('Error generating M3U file');
+      }
+    
+  }
 
     async streamVideoFFmpeg(url, res){
         const videoId = 'https://www.youtube.com/watch?v=' + url; // The YouTube URL to process
@@ -318,10 +350,19 @@ fs.access(targetDir, fs.constants.F_OK, (err) => {
   });
 });
 }
+getVideoUrl(videoUrl) {
+  const streamVideo = this.getBestVideoUrl(videoUrl);
+  return streamVideo;
+  
+}
+getAudioUrl(videoUrl) {
+  const streamAudio = this.getBestAudioUrl(videoUrl);
+  return streamAudio;
+}
 // Function to extract the best video URL
  getBestVideoUrl(videoUrl) {
     return new Promise((resolve, reject) => {
-      const ytDlpProcess = spawn('yt-dlp', ['-f', 'best','-g', videoUrl]);
+      const ytDlpProcess = spawn('yt-dlp', ['-f', 'bv*','-g', videoUrl]);
   
       let output = '';
       let errorOutput = '';
@@ -351,8 +392,41 @@ fs.access(targetDir, fs.constants.F_OK, (err) => {
     });
   }
 
-  async getVideoFfmpeg(id) {
-   
+  getBestAudioUrl(videoUrl) {
+    return new Promise((resolve, reject) => {
+      const ytDlpProcess = spawn('yt-dlp', ['-f', '140','-g', videoUrl]);
+  
+      let output = '';
+      let errorOutput = '';
+  
+      // Capture the standard output
+      ytDlpProcess.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+  
+      // Capture the standard error output
+      ytDlpProcess.stderr.on('data', (data) => {
+        errorOutput += data.toString();
+      });
+  
+      // Handle the process exit
+      ytDlpProcess.on('close', (code) => {
+        if (code === 0) {
+          resolve(output.trim());
+        } else {
+          reject(new Error(`yt-dlp exited with code ${code}: ${errorOutput.trim()}`));
+        }
+      });
+  
+      ytDlpProcess.on('error', (err) => {
+        reject(new Error(`Failed to start yt-dlp process: ${err.message}`));
+      });
+    });
+  }
+
+  getBestVideoUrlStreamDirect(videoUrl) {
+      const ytDlpProcess = spawn('yt-dlp', ['-f', 'bv*+ba/b','-o','-', videoUrl]);
+      return ytDlpProcess.stdout;
   }
 
   getVideoAudioUrls(url) {
