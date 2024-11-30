@@ -321,7 +321,7 @@ fs.access(targetDir, fs.constants.F_OK, (err) => {
 // Function to extract the best video URL
  getBestVideoUrl(videoUrl) {
     return new Promise((resolve, reject) => {
-      const ytDlpProcess = spawn('yt-dlp', ['-f', 'best', videoUrl]);
+      const ytDlpProcess = spawn('yt-dlp', ['-f', 'best','-g', videoUrl]);
   
       let output = '';
       let errorOutput = '';

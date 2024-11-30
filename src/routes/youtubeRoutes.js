@@ -19,7 +19,7 @@ router.get('/proxy/:id', youtubeController.streamVideo.bind(youtubeController));
 router.get('/livestream', youtubeController.livestream);
 
 router.get('/live-ffmpeg', youtubeController.livestreamFFmpeg);
-
+router.get('/live-ffmpeghls', youtubeController.livestreamFFmpegHLS);
 // Ruta para obtener el tipo de video
 router.get('/videoType', youtubeController.getVideoType);
 
