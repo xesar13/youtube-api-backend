@@ -25,6 +25,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use('/api', youTubeRoutes);
 
+// Servir archivos estáticos (como el index.html)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Ruta principal
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Ruta de autenticación con Google
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video + Audio Sync</title>
+</head>
+<body>
+  <video id="video-player" controls autoplay></video>
+    <button onclick="playMedia('KktRXJC2NSk')">Play</button>
+  <script>
+    async function playMedia(videoId) {
+  const response = await fetch(`https://xtremtv.ddns.net/api/getstream?url=${videoId}`);
+  const { audio, video } = await response.json();
+
+  const videoElement = document.getElementById('video-player');
+  const mediaSource = new MediaSource();
+  videoElement.src = URL.createObjectURL(mediaSource);
+
+  mediaSource.addEventListener('sourceopen', () => {
+    const videoSourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp9"');
+    const audioSourceBuffer = mediaSource.addSourceBuffer('audio/mp4; codecs="mp4a.40.2"');
+
+    // Fetch and append video
+    fetch(video)
+      .then((res) => res.arrayBuffer())
+      .then((videoData) => {
+        videoSourceBuffer.appendBuffer(videoData);
+        videoSourceBuffer.addEventListener('updateend', () => {
+          if (!audioSourceBuffer.updating) {
+            mediaSource.endOfStream();
+          }
+        });
+      });
+
+    // Fetch and append audio
+    fetch(audio)
+      .then((res) => res.arrayBuffer())
+      .then((audioData) => {
+        audioSourceBuffer.appendBuffer(audioData);
+        audioSourceBuffer.addEventListener('updateend', () => {
+          if (!videoSourceBuffer.updating) {
+            mediaSource.endOfStream();
+          }
+        });
+      });
+  });
+}
+  </script>
+</body>
+</html>
