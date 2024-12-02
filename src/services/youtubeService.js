@@ -148,15 +148,15 @@ class M3UService {
       try {
 
           // Get the video URL
-          const bestVideoUrl = await this.getBestVideoUrl(videoUrl);
-          const bestAudioUrl = await this.getBestAudioUrl(videoUrl);
+          const bestVideoUrl = await this.getStreamUrl(url,'best');
+          //const bestAudioUrl = await this.getStreamUrl(url,'140');
 
           // Create M3U content
-          const m3uContent = `#EXTM3U\n#EXTINF:-1, YouTube Video\n#EXTVLCOPT:input-slave=${bestAudioUrl}\n${bestVideoUrl}`.trim();
+          const m3uContent = `#EXTM3U\n#EXTINF:-1, YouTube Video\n${bestVideoUrl}`;
 
           // Set headers for downloading the M3U file
           res.setHeader('Content-Disposition', 'inline; filename="playlist.m3u"');
-          res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+          res.setHeader('Content-Type', 'application/x-mpegurl');
 
           // Send M3U content
           res.send(m3uContent);
@@ -350,51 +350,10 @@ fs.access(targetDir, fs.constants.F_OK, (err) => {
   });
 });
 }
-getVideoUrl(videoUrl) {
-  const streamVideo = this.getBestVideoUrl(videoUrl);
-  return streamVideo;
-  
-}
-getAudioUrl(videoUrl) {
-  const streamAudio = this.getBestAudioUrl(videoUrl);
-  return streamAudio;
-}
 // Function to extract the best video URL
- getBestVideoUrl(videoUrl) {
+getStreamUrl(videoUrl,format) {
     return new Promise((resolve, reject) => {
-      const ytDlpProcess = spawn('yt-dlp', ['-f', 'bv*','-g', videoUrl]);
-  
-      let output = '';
-      let errorOutput = '';
-  
-      // Capture the standard output
-      ytDlpProcess.stdout.on('data', (data) => {
-        output += data.toString();
-      });
-  
-      // Capture the standard error output
-      ytDlpProcess.stderr.on('data', (data) => {
-        errorOutput += data.toString();
-      });
-  
-      // Handle the process exit
-      ytDlpProcess.on('close', (code) => {
-        if (code === 0) {
-          resolve(output.trim());
-        } else {
-          reject(new Error(`yt-dlp exited with code ${code}: ${errorOutput.trim()}`));
-        }
-      });
-  
-      ytDlpProcess.on('error', (err) => {
-        reject(new Error(`Failed to start yt-dlp process: ${err.message}`));
-      });
-    });
-  }
-
-  getBestAudioUrl(videoUrl) {
-    return new Promise((resolve, reject) => {
-      const ytDlpProcess = spawn('yt-dlp', ['-f', '140','-g', videoUrl]);
+      const ytDlpProcess = spawn('yt-dlp', ['-f', format,'-g', `https://www.youtube.com/watch?v=${videoUrl}`]);
   
       let output = '';
       let errorOutput = '';

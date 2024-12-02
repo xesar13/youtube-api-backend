@@ -7,18 +7,24 @@ const ytdl = require('ytdl-core');
 const path = require('path');
 const fs = require('fs');
 const ytstream = require('yt-stream');
-
+const { authenticateJWT } = require('./auth/jsongenerate'); // Importa la función de middleware
 const axios = require('axios');
 require('dotenv').config();
-require('./auth/auth'); // Asegúrate de que este archivo exista y esté configurado correctamente
-
+require('./auth/auth'); // Importar la configuración de autenticación
 const youTubeRoutes = require('./routes/youtubeRoutes');
-
+const youtubeAuth = require('./auth/jsongenerate');
+const youtubeService = require('./services/youtubeService');  // Importa el servicio de YouTube
 const app = express();
 const PORT = process.env.PORT || 8011;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'fallback_secret';
-
-app.use(cors()); // Use the cors middleware with your options
+// Configuración de CORS
+const corsOptions = {
+  origin: '*',  // O puedes especificar tu dominio, ej. 'http://example.com'
+  methods: ['GET', 'POST', 'OPTIONS'],  // Métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions)); // Usar el middleware cors con las opciones configuradas
+// Asegúrate de responder a las solicitudes OPTIONS
 app.use(bodyParser.json());
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
@@ -31,6 +37,60 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Ruta principal
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/proxy', async (req, res) => {
+  const videoId = req.query.id;
+
+  let videoUrl = '';
+  let audioUrl = '';
+  if (!videoId) {
+      return res.status(400).send('No video ID provided');
+  }
+
+  try {
+      // Obtén la URL directa del video y audio usando yt-dlp
+      //const ytDlpVideo = spawn('yt-dlp', ['-f', 'bv*+ba', '-g', `https://www.youtube.com/watch?v=${videoId}`]);
+       videoUrl = await youtubeService.getStreamUrl(videoId,'137');
+       audioUrl = await youtubeService.getStreamUrl(videoId,'140');
+
+      ytDlpVideo.stdout.on('data', (data) => {
+          const urls = data.toString().split('\n').filter(Boolean);
+          [videoUrl, audioUrl] = urls;
+      });
+
+      ytDlpVideo.on('close', async () => {
+          if (!videoUrl || !audioUrl) {
+              return res.status(500).send('Failed to retrieve video/audio URLs');
+          }
+
+          // Proxy de video
+          const range = req.headers.range;
+          if (!range) {
+              return res.status(400).send('Requires Range header');
+          }
+
+          const [start, end] = range.replace(/bytes=/, '').split('-');
+          const videoResponse = await axios.get(videoUrl, {
+              headers: {
+                  Range: `bytes=${start}-${end}`,
+              },
+              responseType: 'stream',
+          });
+
+          res.writeHead(206, {
+              'Content-Range': videoResponse.headers['content-range'],
+              'Accept-Ranges': 'bytes',
+              'Content-Length': videoResponse.headers['content-length'],
+              'Content-Type': 'video/mp4',
+          });
+
+          videoResponse.data.pipe(res);
+      });
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Error fetching video data');
+  }
 });
 
 // Ruta de autenticación con Google

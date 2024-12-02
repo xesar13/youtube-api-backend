@@ -1,6 +1,8 @@
 const express = require('express');
 const youtubeService = require('../services/youtubeService');
+const youtubeAuth = require('../auth/jsongenerate');
 const ytdl = require('ytdl-core');
+const { default: axios } = require('axios');
 class M3UController {
     async getVideos(req, res) {
         try {
@@ -81,20 +83,16 @@ class M3UController {
         if (!url) {
             return res.status(400).send('URL is required');
         }
-
-        if (!url) {
-            return res.status(400).send('URL is required');
-        }
         if (youtubeService.validateUrl(url)) {
         url = youtubeService.extractYouTubeId(url);
         }
         try {
             // Obtener información del video
 
-            const video = await youtubeService.getVideoUrl(url);
-
-            const audio = await youtubeService.getAudioUrl(url);
-
+            //res.setHeader('Access-Control-Allow-Origin', '*');
+            //res.setHeader('Content-Type', response.headers['content-type']);
+            const video = await youtubeService.getStreamUrl(url,'248');
+            const audio = await youtubeService.getStreamUrl(url,'140');
             res.json({audio,video});
         } catch (error) {
             console.error('Error streaming video:', error);
@@ -302,7 +300,18 @@ class M3UController {
             }
         }
     };
-
+    async generateToken(req,res)
+    {
+        try{
+      const token = youtubeAuth.generateToken(req, res);
+             res.json({ token });
+        }catch(error){
+            console.error('Error generating token:', error);
+            if (!res.headersSent) {
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        }
+    }
 }
 
 
