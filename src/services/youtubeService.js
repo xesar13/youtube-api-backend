@@ -1,10 +1,12 @@
 const axios = require('axios');
 require('dotenv').config();
 const ytdl = require('ytdl-core');
-const ytstream = require('yt-stream');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const httpProxy = require('http-proxy');
+const proxy = httpProxy.createProxyServer();
+
 class M3UService {
     constructor() {
         if (!M3UService.instance) {
@@ -26,6 +28,31 @@ class M3UService {
         return response.data.items;
     }
 
+    async fetchVideosByCategoriesAll() {
+      // Leer el archivo config.json
+      const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+      const categories = config.category_youtube.items.map(item => item.id);
+      console.log(categories);
+      const apiKey = process.env.YOUTUBE_API_KEY;
+      const videosByCategory = {};
+  
+      for (const categoryId of categories) {
+          const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&videoCategoryId=${categoryId}&key=${apiKey}`;
+          const response = await axios.get(url);
+          console.log(response.data.items);
+          videosByCategory[categoryId] = response.data.items;
+      }
+      return videosByCategory;
+  }
+
+    async fetchVideosSuscribes() {
+      const apiKey = process.env.YOUTUBE_API_KEY;
+      const url = `https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&key=${apiKey}`;
+    
+      const response = await axios.get(url);
+      return response.data.items;
+  }
+
     async fetchVideoById(id) {
         const apiKey = process.env.YOUTUBE_API_KEY;
         const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${id}&key=${apiKey}`;
@@ -34,21 +61,30 @@ class M3UService {
         return response.data.items[0];
     }
 
-    async searchVideos(query) {
+    async searchVideos(query, type, eventType, category, maxResults) {
         const apiKey = process.env.YOUTUBE_API_KEY;
-        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&key=${apiKey}`;
-      
-        const response = await axios.get(url);
-        const videoIds = response.data.items.map(item => item.id.videoId).filter(id => id);
+        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&order=date&regionCode=MX&key=${apiKey}`;
+        if (maxResults > 0) {
+            url += `&maxResults=${maxResults}`;
+        }
+        if (eventType !== 'none' && type !== 'none') {
+            url += `&eventType=${eventType}&type=${type}`;
+        }
+        if (category !== 'none') {
+            url += `&videoCategoryId=${category}`;
+        } 
+        console.log(url);
+       // const response = await axios.get(url);
+       // const videoIds = response.data.items.map(item => item.id.videoId).filter(id => id);
     
-        const videoDetails = await Promise.all(videoIds.map(async (id) => {
+     /*   const videoDetails = await Promise.all(videoIds.map(async (id) => {
             const videoUrl = `https://www.youtube.com/watch?v=${id}`;
             const info = await this.getVideoInfo(videoUrl);
             const hasAudio = info.formats.some(format => format.hasAudio);
             const hasVideo = info.formats.some(format => format.hasVideo);
             const infoDetails = info.videoDetails;
             return hasAudio && hasVideo ? infoDetails : null;
-        }));
+        }));*/
     
         return videoDetails;
     }
@@ -137,7 +173,7 @@ class M3UService {
       
     }
 
-    async streamVideoAudioM3u (url, res){
+    async streamVideoAudioM3u (url, res,info){
               
       const videoUrl = url; // The YouTube URL to process
 
@@ -146,17 +182,24 @@ class M3UService {
       }
 
       try {
-
+        console.log(info);
           // Get the video URL
-          const bestVideoUrl = await this.getStreamUrl(url,'best');
+         const bestVideoUrl = await this.getStreamUrl(url,'best');
+                 // Proxy the request to the M3U8 URL
+   /*     proxy.web(req, res, { target: bestVideoUrl, changeOrigin: true }, (error) => {
+          if (error) {
+              console.error('Error proxying request:', error.message);
+              res.status(500).send('Error proxying request');
+          }
+      });*/
           //const bestAudioUrl = await this.getStreamUrl(url,'140');
 
           // Create M3U content
-          const m3uContent = `#EXTM3U\n#EXTINF:-1, YouTube Video\n${bestVideoUrl}`;
+          const m3uContent = `#EXTM3U\n#EXTINF:-1, ${info.videoDetails.title}\n${bestVideoUrl}`;
 
           // Set headers for downloading the M3U file
           res.setHeader('Content-Disposition', 'inline; filename="playlist.m3u"');
-          res.setHeader('Content-Type', 'application/x-mpegurl');
+          //res.setHeader('Content-Type', 'application/x-mpegurl');
 
           // Send M3U content
           res.send(m3uContent);
@@ -167,6 +210,45 @@ class M3UService {
       }
     
   }
+
+  async streamVideoAudioDirect (url, res,req){
+    const videoUrl = url; // The YouTube URL to process
+
+    if (!videoUrl) {
+        return res.status(400).send('Missing URL parameter');
+    }
+    try {
+       // Get the video URL
+      // const bestVideoUrl = await this.getStreamUrl(url,'best');
+      const bestVideoUrl = ytdl(url, { format: 'best' });
+      const range = req.headers.range;
+
+      const headers = {};
+      if (range) {
+          headers.Range = range;
+      }
+
+      const response = await axios.get(bestVideoUrl, {
+          headers,
+          responseType: 'stream'
+      });
+
+      // Copiar los encabezados de la respuesta de axios a la respuesta de Express
+      Object.keys(response.headers).forEach(key => {
+          res.setHeader(key, response.headers[key]);
+      });
+
+      if (range) {
+          res.status(206); // HTTP Status 206 for Partial Content
+      }
+      console.log(bestVideoUrl);
+      bestVideoUrl.pipe(res);
+  } catch (error) {
+      console.error("Error playing video part:", error.message);
+      throw error;
+  }
+  
+}
 
     async streamVideoFFmpeg(url, res){
         const videoId = 'https://www.youtube.com/watch?v=' + url; // The YouTube URL to process

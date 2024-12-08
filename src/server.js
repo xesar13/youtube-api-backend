@@ -7,6 +7,8 @@ const ytdl = require('ytdl-core');
 const path = require('path');
 const fs = require('fs');
 const ytstream = require('yt-stream');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
 const { authenticateJWT } = require('./auth/jsongenerate'); // Importa la función de middleware
 const axios = require('axios');
 require('dotenv').config();
@@ -92,6 +94,7 @@ app.get('/proxy', async (req, res) => {
       res.status(500).send('Error fetching video data');
   }
 });
+
 
 // Ruta de autenticación con Google
 app.get('/auth/google',

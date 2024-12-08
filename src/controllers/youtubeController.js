@@ -27,7 +27,32 @@ class M3UController {
     async searchVideos(req, res) {
         try {
             const query = req.query.q;
-            const videos = await youtubeService.searchVideos(query);
+            const type = req.query.type || 'none';
+            const eventType = req.query.eventtype || 'none';
+            const category = req.query.category || 'none';
+            const maxResults = req.query.maxresults || 0;
+            //const validateWordsType = this.validateWordsType(req.query.eventtype) && this.validateWordsType(req.query.type);
+            if (query === undefined) {
+                return res.status(400).send('Query is required');
+            }
+
+            if (this.validateWordsType(req.query.eventtype)) {
+                if (!this.validateWordsType(req.query.type)){
+                return res.status(400).send('Type & eventType is required')
+                }
+            }
+        
+            const videos = await youtubeService.searchVideos(query,type,eventType,category,maxResults);
+            res.json(videos);
+        } catch (error) {
+            res.status(500).send(error.message);
+        }
+    }
+
+    async fetchVideoSuscribes(req, res) {
+        try {
+            //const query = req.query.q;
+            const videos = await youtubeService.fetchVideosSuscribes(query);
             res.json(videos);
         } catch (error) {
             res.status(500).send(error.message);
@@ -112,9 +137,9 @@ class M3UController {
             // Obtener información del video
             const info = await youtubeService.getVideoInfo(url);
             // Obtener el formato del video
-            const format = youtubeService.getVideoFormat(info);
+           // const format = youtubeService.getVideoFormat(info);
              // Verificar si es un livestream
-             youtubeService.streamVideoAudioM3u(url, res);
+             youtubeService.streamVideoAudioM3u(url, res,info);
              return;
  
             /*const isLive = info.videoDetails.isLiveContent || info.formats.some(format =>
@@ -143,6 +168,26 @@ class M3UController {
             }
             if (!res.headersSent) {
                 res.status(500).json({ error: 'Internal server error' });
+            }
+        }
+    };
+
+
+    async liveDirectVideo (req, res) {
+        let url = req.query.url;
+
+        if (!url) {
+            return res.status(400).send('URL is required');
+        }
+        if (youtubeService.validateUrl(url)) {
+           url = youtubeService.extractYouTubeId(url);
+        }
+        try {
+            await youtubeService.streamVideoAudioDirect(url, res,req);
+        }  catch (error) {
+            console.error('Error streaming video:', error);
+            if (error.message === 'Invalid video URL') {
+                return res.status(400).json({ error: 'Invalid video URL' });
             }
         }
     };
@@ -264,6 +309,17 @@ class M3UController {
         }
     };
 
+    async fetchVideosByCategoriesAll(req,res){
+
+        try{
+            const videos = await youtubeService.fetchVideosByCategoriesAll();
+            res.json({videos});
+            
+        }catch(error){
+            res.status(500).send(error.message);
+        }
+    }
+
     async getVideoType (req, res) {
         let url = req.query.url;
         if (!url) {
@@ -311,6 +367,16 @@ class M3UController {
                 res.status(500).json({ error: 'Internal server error' });
             }
         }
+    }
+
+    validateWordsEventType(word) {
+            const wordArray = ['completed','live','upcoming'];
+            return containsWord(word, wordArray);
+    }
+
+    validateWordsType(word) {
+            const wordArray = ['video','channel','playlist'];
+            return containsWord(word, wordArray);
     }
 }
 
