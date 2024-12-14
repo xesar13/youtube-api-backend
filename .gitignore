@@ -19,7 +19,7 @@ bower_components/
 
 # Optional npm cache directory
 .npm
-
+*.db
 # Optional eslint cache
 .eslintcache
 

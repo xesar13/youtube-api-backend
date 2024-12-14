@@ -435,7 +435,7 @@ fs.access(targetDir, fs.constants.F_OK, (err) => {
 // Function to extract the best video URL
 getStreamUrl(videoUrl,format) {
     return new Promise((resolve, reject) => {
-      const ytDlpProcess = spawn('yt-dlp', ['-f', format,'-g', `https://www.youtube.com/watch?v=${videoUrl}`]);
+      const ytDlpProcess = spawn('yt-dlp', ['-f', format,'-g', `https://www.youtube.com/watch?v=${videoUrl}`], { windowsHide: true });
   
       let output = '';
       let errorOutput = '';
@@ -466,16 +466,16 @@ getStreamUrl(videoUrl,format) {
   }
 
   getBestVideoUrlStreamDirect(videoUrl) {
-      const ytDlpProcess = spawn('yt-dlp', ['-f', 'bv*+ba/b','-o','-', videoUrl]);
+      const ytDlpProcess = spawn('yt-dlp', ['-f', 'bv*+ba/b','-o','-', videoUrl], {windowsHide: true });
       return ytDlpProcess.stdout;
   }
 
   getVideoAudioUrls(url) {
     return new Promise((resolve, reject) => {
         // Llamar a yt-dlp para obtener las URL de video
-        const videoStream = spawn('yt-dlp', ['-f', '137',  '-g', url]);
+        const videoStream = spawn('yt-dlp', ['-f', '137',  '-g', url], {windowsHide: true });
         // Llamar a yt-dlp para obtener las URL de audio
-        const audioStream = spawn('yt-dlp', ['-f', '140', '-g', url]);
+        const audioStream = spawn('yt-dlp', ['-f', '140', '-g', url], {windowsHide: true });
 
         let videoUrlStream;
         let audioUrlStream;
