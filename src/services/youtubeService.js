@@ -4,16 +4,36 @@ const ytdl = require('ytdl-core');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const httpProxy = require('http-proxy');
-const proxy = httpProxy.createProxyServer();
+const { google } = require('googleapis');
+const OAuth2 = google.auth.OAuth2;
 
-class M3UService {
-    constructor() {
-        if (!M3UService.instance) {
-            M3UService.instance = this;
-        }
-        return M3UService.instance;
-    }
+class YouTubeService {
+  constructor() {
+    this.oauth2Client = new OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.YOUTUBE_CALLBACK_URL
+    );
+  }
+
+  
+  setCredentials(tokens) {
+    this.oauth2Client.setCredentials(tokens);
+  }
+
+  async getMyChannel() {
+    const youtube = google.youtube({
+      version: 'v3',
+      auth: this.oauth2Client
+    });
+
+    const response = await youtube.channels.list({
+      part: 'snippet,contentDetails,statistics',
+      mine: true
+    });
+
+    return response.data.items;
+  }
 
     validateUrl (url) {
         const urlPattern = /^(https?:\/\/)/;
@@ -529,7 +549,4 @@ getStreamUrl(videoUrl,format) {
 }
 
 }
-const instance = new M3UService();
-Object.freeze(instance);
-
-module.exports = instance;
+module.exports = new YouTubeService();

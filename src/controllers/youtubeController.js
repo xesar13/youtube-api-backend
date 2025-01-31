@@ -4,7 +4,21 @@ const youtubeAuth = require('../auth/jsongenerate');
 const ytdl = require('ytdl-core');
 const { default: axios } = require('axios');
 const {containsWord} = require('../utils/utils')
-class M3UController {
+class YouTubeController {
+    async getMyChannel(req, res) {
+        try {
+          const tokens = {
+            access_token: req.user.accessToken,
+            refresh_token: req.user.refreshToken
+          };
+          youtubeService.setCredentials(tokens);
+          const channel = await youtubeService.getMyChannel();
+          res.json(channel);
+        } catch (error) {
+          res.status(500).send(error.message);
+        }
+      }
+      
     async getVideos(req, res) {
         try {
             const videos = await youtubeService.fetchVideos();
@@ -384,4 +398,4 @@ class M3UController {
 }
 
 
-module.exports = new M3UController();
+module.exports = new YouTubeController();

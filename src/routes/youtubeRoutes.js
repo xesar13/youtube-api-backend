@@ -4,7 +4,7 @@ const youtubeController = require('../controllers/youtubeController');
 const { ensureAuthenticated } = require('../auth/ensureAuthenticated');
 
 // Ruta para obtener videos de YouTube
-router.get('/videos', ensureAuthenticated, youtubeController.getVideos.bind(youtubeController));
+router.get('/videos', youtubeController.getVideos.bind(youtubeController));
 
 // Ruta para obtener videos suscribciones de YouTube
 router.get('/suscribes',  youtubeController.fetchVideoSuscribes.bind(youtubeController));
@@ -33,5 +33,8 @@ router.get('/live-ffmpeghls',  youtubeController.livestreamFFmpegHLS);
 // Ruta para obtener el tipo de video
 router.get('/videoType',  youtubeController.getVideoType);
 router.get('/generatetoken',  youtubeController.generateToken);
+
+// Ruta para obtener la información del canal del usuario autenticado
+router.get('/mychannel', ensureAuthenticated, youtubeController.getMyChannel.bind(youtubeController));
 
 module.exports = router;
