@@ -8,8 +8,8 @@ class YouTubeController {
     async getMyChannel(req, res) {
         try {
           const tokens = {
-            access_token: req.user.accessToken,
-            refresh_token: req.user.refreshToken
+            access_token: req.tokens.accessToken,
+            refresh_token: req.tokens.refreshToken
           };
           youtubeService.setCredentials(tokens);
           const channel = await youtubeService.getMyChannel();
@@ -39,19 +39,19 @@ class YouTubeController {
     }
 
 
-        // Nuevo método para obtener el token de acceso
-        async getToken(req, res) {
-            try {
-                const tokens = {
-                    access_token: req.user.accessToken,
-                    refresh_token: req.user.refreshToken
-                };
-                res.json(tokens);
-            } catch (error) {
-                res.status(500).send(error.message);
-            }
+    // Nuevo método para obtener el token de acceso
+    async getToken(req, res) {
+        try {
+            const tokens = {
+                access_token: req.tokens.accessToken,
+                refresh_token: req.tokens.refreshToken
+            };
+            res.json(tokens);
+        } catch (error) {
+            res.status(500).send(error.message);
         }
-        
+    }
+
     async searchVideos(req, res) {
         try {
             const query = req.query.q;
