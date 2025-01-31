@@ -64,7 +64,7 @@ app.get('/logout', (req, res) => {
         return res.status(500).send('Error al cerrar sesión');
       }
       // Redirigir a la página de cierre de sesión de Google
-      res.redirect('https://accounts.google.com/Logout?continue=https://appengine.google.com/_ah/logout?continue=https://xtremtv.ddns.net');
+      res.redirect('https://accounts.google.com/Logout?continue=https://appengine.google.com/_ah/logout?continue=https://youtube-api.inydqs.easypanel.host');
     });
   });
 });
