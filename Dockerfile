@@ -1,8 +1,5 @@
-# Usar una imagen base de Node.js
-FROM node:18.20
-
-# Establecer el directorio de trabajo
-WORKDIR /app
+# Usar una imagen base con Node.js y npm preinstalados
+FROM node:20.18 AS base
 
 # Copiar package.json y package-lock.json
 COPY package*.json ./
@@ -10,10 +7,12 @@ COPY package*.json ./
 # Instalar las dependencias
 RUN npm install
 
-# Instalar yt-dlp
-RUN apt-get update && apt-get install -y python3-pip && pip3 install yt-dlp
+# Usar la imagen jauderho/yt-dlp como base para yt-dlp
+FROM jauderho/yt-dlp:latest AS yt-dlp
 
-# Copiar el resto del código de la aplicación
+# Copiar las dependencias instaladas y el código de la aplicación desde la imagen base
+COPY --from=base /node_modules /node_modules
+COPY --from=base /package*.json ./
 COPY . .
 
 # Exponer el puerto en el que la aplicación se ejecuta
