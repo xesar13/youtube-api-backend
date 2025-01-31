@@ -37,4 +37,7 @@ router.get('/generatetoken',  youtubeController.generateToken);
 // Ruta para obtener la información del canal del usuario autenticado
 router.get('/mychannel',  youtubeController.getMyChannel.bind(youtubeController));
 
+// Nueva ruta para obtener el token de acceso
+router.get('/token', youtubeController.getToken.bind(youtubeController));
+
 module.exports = router;

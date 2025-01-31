@@ -39,6 +39,19 @@ class YouTubeController {
     }
 
 
+        // Nuevo método para obtener el token de acceso
+        async getToken(req, res) {
+            try {
+                const tokens = {
+                    access_token: req.user.accessToken,
+                    refresh_token: req.user.refreshToken
+                };
+                res.json(tokens);
+            } catch (error) {
+                res.status(500).send(error.message);
+            }
+        }
+        
     async searchVideos(req, res) {
         try {
             const query = req.query.q;
