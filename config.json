@@ -56,26 +56,6 @@
           },
           {
             "kind": "youtube#videoCategory",
-            "etag": "5kFljz9YJ4lEgSfVwHWi5kTAwAs",
-            "id": "18",
-            "snippet": {
-              "title": "Short Movies",
-              "assignable": false,
-              "channelId": "UCBR8-60-B28hp2BmDPdntcQ"
-            }
-          },
-          {
-            "kind": "youtube#videoCategory",
-            "etag": "ANnLQyzEA_9m3bMyJXMhKTCOiyg",
-            "id": "19",
-            "snippet": {
-              "title": "Travel & Events",
-              "assignable": true,
-              "channelId": "UCBR8-60-B28hp2BmDPdntcQ"
-            }
-          },
-          {
-            "kind": "youtube#videoCategory",
             "etag": "0Hh6gbZ9zWjnV3sfdZjKB5LQr6E",
             "id": "20",
             "snippet": {

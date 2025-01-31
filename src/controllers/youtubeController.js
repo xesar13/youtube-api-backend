@@ -3,6 +3,7 @@ const youtubeService = require('../services/youtubeService');
 const youtubeAuth = require('../auth/jsongenerate');
 const ytdl = require('ytdl-core');
 const { default: axios } = require('axios');
+const {containsWord} = require('../utils/utils')
 class M3UController {
     async getVideos(req, res) {
         try {
@@ -183,7 +184,9 @@ class M3UController {
            url = youtubeService.extractYouTubeId(url);
         }
         try {
-            await youtubeService.streamVideoAudioDirect(url, res,req);
+            //await youtubeService.streamVideoAudioDirect(url, res,req);
+            await youtubeService.getStreamUrl(url, 'b');
+
         }  catch (error) {
             console.error('Error streaming video:', error);
             if (error.message === 'Invalid video URL') {

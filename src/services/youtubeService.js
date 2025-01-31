@@ -23,8 +23,14 @@ class M3UService {
     async fetchVideos() {
         const apiKey = process.env.YOUTUBE_API_KEY;
         const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&key=${apiKey}`;
-      
-        const response = await axios.get(url);
+      // const url = `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=id,snippet,contentDetails,status&broadcastStatus=active&key=${apiKey}`;
+      let response;
+      try{
+        response = await axios.get(url);
+      }catch{
+        return;
+      }
+        
         return response.data.items;
     }
 
@@ -38,9 +44,13 @@ class M3UService {
   
       for (const categoryId of categories) {
           const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&videoCategoryId=${categoryId}&key=${apiKey}`;
-          const response = await axios.get(url);
-          console.log(response.data.items);
-          videosByCategory[categoryId] = response.data.items;
+          try{
+            const response = await axios.get(url);
+            console.log(response.data.items);
+            videosByCategory[categoryId] = response.data.items;
+          }catch{
+            console.log(`${categoryId} - No es posible consultar`);
+          }
       }
       return videosByCategory;
   }
@@ -55,7 +65,7 @@ class M3UService {
 
     async fetchVideoById(id) {
         const apiKey = process.env.YOUTUBE_API_KEY;
-        const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${id}&key=${apiKey}`;
+        const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${id}&key=${apiKey}`;
       
         const response = await axios.get(url);
         return response.data.items[0];
@@ -63,7 +73,7 @@ class M3UService {
 
     async searchVideos(query, type, eventType, category, maxResults) {
         const apiKey = process.env.YOUTUBE_API_KEY;
-        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&order=date&regionCode=MX&key=${apiKey}`;
+        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&order=date&key=${apiKey}`;
         if (maxResults > 0) {
             url += `&maxResults=${maxResults}`;
         }
@@ -73,20 +83,21 @@ class M3UService {
         if (category !== 'none') {
             url += `&videoCategoryId=${category}`;
         } 
-        console.log(url);
-       // const response = await axios.get(url);
-       // const videoIds = response.data.items.map(item => item.id.videoId).filter(id => id);
+       // console.log(url);
+        const response = await axios.get(url);
+        const videoIds = response.data.items.map(item => item.id.videoId).filter(id => id);
     
-     /*   const videoDetails = await Promise.all(videoIds.map(async (id) => {
-            const videoUrl = `https://www.youtube.com/watch?v=${id}`;
-            const info = await this.getVideoInfo(videoUrl);
-            const hasAudio = info.formats.some(format => format.hasAudio);
-            const hasVideo = info.formats.some(format => format.hasVideo);
-            const infoDetails = info.videoDetails;
-            return hasAudio && hasVideo ? infoDetails : null;
+        /*const videoDetails = await Promise.all(videoIds.map(async (id) => {
+            //const videoUrl = `https://www.youtube.com/watch?v=${id}`;
+            //const info = await this.getVideoInfo(videoUrl);
+            const info = await this.getStreamUrl(id,'b');
+          //  const hasAudio = info.formats.some(format => format.hasAudio);
+       //     const hasVideo = info.formats.some(format => format.hasVideo);
+            const infoDetails = info;
+            return infoDetails //hasAudio && hasVideo ? infoDetails : null;
         }));*/
     
-        return videoDetails;
+        return response.data.items;
     }
 
     async getVideoInfo (url) {
