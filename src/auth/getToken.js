@@ -1,6 +1,10 @@
 const db = require('../database/database');
 
 async function getToken(req, res, next) {
+  if (!req.user || !req.user.id) {
+    return res.status(401).send('Usuario no autenticado');
+  }
+
   const userId = req.user.id; // Asumiendo que el usuario está autenticado y su ID está en req.user
 
   const query = `SELECT accessToken, refreshToken FROM users WHERE id = ?`;

@@ -5,7 +5,8 @@ const db = require('../database/database'); // Importar la configuración de la 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.YOUTUBE_CALLBACK_URL
+    callbackURL: process.env.YOUTUBE_CALLBACK_URL,
+    scope: ['profile', 'email', 'https://www.googleapis.com/auth/youtube.readonly']
   },
   function(accessToken, refreshToken, profile, done) {
     // Guardar el perfil del usuario en la base de datos
