@@ -5,9 +5,11 @@ const session = require('express-session');
 const passport = require('passport');
 const ytdl = require('ytdl-core');
 const path = require('path');
-
+const youtubeController = require('./controllers/youtubeController');
+ 
 require('dotenv').config();
 require('./auth/auth'); // Importar la configuración de autenticación
+const {authenticate} = require('./auth/ensureAuthenticated'); // Importar la función de autenticación
 const youTubeRoutes = require('./routes/youtubeRoutes');
 //const youtubeAuth = require('./auth/jsongenerate');
 const app = express();
@@ -54,6 +56,40 @@ app.get('/auth/google/callback',
   }
 );
 
+// Ruta para iniciar autenticación
+app.get("/auth", async (req, res) => {
+  try {
+      const authClient = await authenticate();
+      const authUrl = authClient.generateAuthUrl({
+          access_type: "offline",
+          scope: ["https://www.googleapis.com/auth/youtube.readonly"],
+      });
+
+      res.redirect(authUrl);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// Ruta del callback donde se recibe el código de autenticación
+app.get("/auth/callback", async (req, res) => {
+  const code = req.query.code;
+
+  if (!code) {
+      return res.status(400).send("Código de autenticación faltante.");
+  }
+
+  try {
+      const authClient = await authenticate();
+      const { tokens } = await authClient.getToken(code);
+      authClient.setCredentials(tokens);
+      fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
+      res.send("Autenticación exitosa. Puedes cerrar esta ventana.");
+  } catch (error) {
+      res.status(500).send("Error al obtener el token.");
+  }
+});
+
 // Ruta para cerrar sesión
 app.get('/logout', (req, res) => {
   req.logout((err) => {
@@ -77,6 +113,37 @@ app.get('/profile', (req, res) => {
   res.send(`Hola, ${req.user.displayName}`);
 });
   
+
+app.get("/videos", async (req, res) => {
+  try {
+      const auth = await authenticate();
+      const videos = await youtubeController.listVideos(auth);
+      res.json(videos);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/channels/:id", async (req, res) => {
+  try {
+      const auth = await authenticate();
+      const channel = await youtubeController.listChannels(auth, req.params.id);
+      res.json(channel);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/search", async (req, res) => {
+  try {
+      const auth = await authenticate();
+      const results = await youtubeController.searchVideos(auth, req.query.q);
+      res.json(results);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

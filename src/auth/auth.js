@@ -27,7 +27,7 @@ passport.use(new GoogleStrategy({
         console.error('Error al guardar el perfil del usuario en la base de datos:', err);
         return done(err);
       }
-      console.log(`${userProfile.id},${userProfile.emails},${userProfile.accessToken},${userProfile.refreshToken},Perfil del usuario guardado correctamente en la base de datos.`);
+      console.log(`${userProfile.id},${userProfile.emails},${userProfile.accessToken},${userProfile.id},Perfil del usuario guardado correctamente en la base de datos.`);
       return done(null, profile);
     });
   }
