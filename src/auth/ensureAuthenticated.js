@@ -11,7 +11,7 @@ function ensureAuthenticated(req, res, next) {
 }
 
 // Rutas de archivos
-const TOKEN_PATH = path.join(__dirname, "token.json");
+const TOKEN_PATH = path.join("/app/data", "token.json");
 
 async function getCredentials() {
     const credentialsUrl = process.env.CREDENTIALS_URL; // Leer la URL desde las variables de entorno

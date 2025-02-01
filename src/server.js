@@ -71,7 +71,6 @@ app.get("/auth", async (req, res) => {
   }
 });
 
-// Ruta del callback donde se recibe el código de autenticación
 app.get("/auth/callback", async (req, res) => {
   const code = req.query.code;
 
@@ -87,7 +86,8 @@ app.get("/auth/callback", async (req, res) => {
       fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
       res.send("Autenticación exitosa. Puedes cerrar esta ventana.");
   } catch (error) {
-      res.status(500).send("Error al obtener el token.");
+      console.error("Error al obtener el token:", error);
+      res.status(500).send(`Error al obtener el token: ${error.message}`);
   }
 });
 
