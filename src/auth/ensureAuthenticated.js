@@ -76,4 +76,4 @@ async function authenticate() {
   });
 }*/
 
-module.exports = { ensureAuthenticated,authenticate };
+module.exports = { ensureAuthenticated,authenticate,TOKEN_PATH };

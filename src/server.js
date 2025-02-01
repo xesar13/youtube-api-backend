@@ -9,7 +9,7 @@ const youtubeController = require('./controllers/youtubeController');
  
 require('dotenv').config();
 require('./auth/auth'); // Importar la configuración de autenticación
-const {authenticate} = require('./auth/ensureAuthenticated'); // Importar la función de autenticación
+const {authenticate,TOKEN_PATH} = require('./auth/ensureAuthenticated'); // Importar la función de autenticación
 const youTubeRoutes = require('./routes/youtubeRoutes');
 //const youtubeAuth = require('./auth/jsongenerate');
 const app = express();
