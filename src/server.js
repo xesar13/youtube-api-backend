@@ -82,11 +82,12 @@ app.get("/auth/callback", async (req, res) => {
   try {
       const authClient = await authenticate();
       const { tokens } = await authClient.getToken(code);
+      console.log('TOKEN:' + tokens + TOKEN_PATH);
       authClient.setCredentials(tokens);
       fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
       res.send("Autenticación exitosa. Puedes cerrar esta ventana.");
   } catch (error) {
-      res.status(500).send("Error al obtener el token.");
+      res.status(500).send("Error al obtener el token." + tokens + TOKEN_PATH);
   }
 });
 
