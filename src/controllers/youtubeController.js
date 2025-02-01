@@ -46,6 +46,7 @@ class YouTubeController {
                 access_token: req.tokens.accessToken,
                 refresh_token: req.tokens.refreshToken
             };
+            console.log('Access token:', tokens.access_token);
             res.json(tokens);
         } catch (error) {
             res.status(500).send(error.message);
