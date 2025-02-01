@@ -6,7 +6,8 @@ const passport = require('passport');
 const ytdl = require('ytdl-core');
 const path = require('path');
 const youtubeController = require('./controllers/youtubeController');
- 
+const fs = require("fs");
+
 require('dotenv').config();
 require('./auth/auth'); // Importar la configuración de autenticación
 const {authenticate,TOKEN_PATH} = require('./auth/ensureAuthenticated'); // Importar la función de autenticación
