@@ -87,7 +87,7 @@ app.get("/auth/callback", async (req, res) => {
       fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
       res.send("Autenticación exitosa. Puedes cerrar esta ventana.");
   } catch (error) {
-      res.status(500).send("Error al obtener el token." + tokens + TOKEN_PATH);
+      res.status(500).send("Error al obtener el token.");
   }
 });
 
