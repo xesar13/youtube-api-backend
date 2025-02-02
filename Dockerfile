@@ -17,9 +17,6 @@ COPY package*.json ./
 # Instalar las dependencias
 RUN npm install
 
-# Copiar el archivo .env
-COPY .env .env
-
 # Copiar el resto del código de la aplicación
 COPY . .
 
