@@ -70,6 +70,7 @@ router.get('/videos', async (req, res) => {
         const results = await youtubeController.searchVideos(auth, req.query.q);
         res.json(results);
     } catch (error) {
+        console.error("Error en la ruta /search:", error);
         res.status(500).json({ error: error.message });
     }
   });

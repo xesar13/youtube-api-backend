@@ -32,15 +32,20 @@ class YouTubeController {
     if (!query) throw new Error("El parámetro de búsqueda 'q' es requerido.");
 
     const youtube = google.youtube({ version: "v3", auth });
-    const response = await youtube.search.list({
+    try {
+      const response = await youtube.search.list({
         part: "snippet",
         q: query,
         maxResults: 5,
         type: "video",
-    });
+      });
 
-    return response.data.items;  // 👈 Asegúrate de retornar los resultados
-}
+      return response.data.items;  // 👈 Asegúrate de retornar los resultados
+    } catch (error) {
+      console.error("Error al buscar videos:", error);
+      throw new Error("Error al buscar videos");
+    }
+  }
 
   async getMyChannel(req, res) {
     try {
