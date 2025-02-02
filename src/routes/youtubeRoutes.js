@@ -71,7 +71,7 @@ router.get('/videos', async (req, res) => {
         res.json(results);
     } catch (error) {
         console.error("Error en la ruta /search:", error);
-        res.status(500).json({ error: error.message });
+        //res.status(500).json({ error: error.message });
     }
   });
 
