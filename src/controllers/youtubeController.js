@@ -29,15 +29,19 @@ class YouTubeController {
   }
 
   async searchVideos(auth, query) {
+    if (!query) throw new Error("El parámetro de búsqueda 'q' es requerido.");
+
     const youtube = google.youtube({ version: "v3", auth });
     const response = await youtube.search.list({
-      part: "snippet",
-      q: query,
-      maxResults: 5,
-      type: "video"
+        part: "snippet",
+        q: query,
+        maxResults: 5,
+        type: "video",
     });
-    return response.data.items;
-  }
+
+    return response.data.items;  // 👈 Asegúrate de retornar los resultados
+}
+
   async getMyChannel(req, res) {
     try {
       const tokens = {
