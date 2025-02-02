@@ -94,7 +94,7 @@ class YouTubeController {
     }
   }
 
-  async searchVideos(req, res) {
+ /* async searchVideos(req, res) {
     try {
       const query = req.query.q;
       const type = req.query.type || "none";
@@ -123,7 +123,7 @@ class YouTubeController {
     } catch (error) {
       res.status(500).send(error.message);
     }
-  }
+  }*/
 
   async fetchVideoSuscribes(req, res) {
     try {
