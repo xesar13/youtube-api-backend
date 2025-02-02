@@ -116,36 +116,6 @@ app.get('/profile', (req, res) => {
 });
   
 
-app.get("/videos", async (req, res) => {
-  try {
-      const auth = await authenticate();
-      const videos = await youtubeController.listVideos(auth);
-      res.json(videos);
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-});
-
-app.get("/channels/:id", async (req, res) => {
-  try {
-      const auth = await authenticate();
-      const channel = await youtubeController.listChannels(auth, req.params.id);
-      res.json(channel);
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-});
-
-app.get("/search", async (req, res) => {
-  try {
-      const auth = await authenticate();
-      const results = await youtubeController.searchVideos(auth, req.query.q);
-      res.json(results);
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
-});
-
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
